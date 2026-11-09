@@ -365,10 +365,15 @@
     } else showTemp(S.pick);
     hint();
   }
+  /* the part to hide: the touched mesh, or its group (an IGZ group / SketchUp component holding
+     several material meshes) — but never a group that is a large share of the model (a SKP file
+     often keeps everything under one or two nodes, and that hid the whole model) */
   function entityOf(mesh) {
-    let o = mesh;
-    if (o.parent && o.parent !== S.model && o.parent !== S.model.children[0]) o = o.parent;
-    return o;
+    const p = mesh.parent;
+    if (!p || p === S.model || p === S.model.children[0]) return mesh;
+    let meshes = 0; p.traverse((q) => { if (q.isMesh) meshes++; });
+    const d = new THREE.Box3().setFromObject(p).getSize(V3(0, 0, 0)).length();
+    return meshes <= 40 && d < S.radius * 2 * 0.35 ? p : mesh;
   }
 
   /* area: the touched face = the connected coplanar triangles (edge neighbours) of that mesh */
@@ -468,11 +473,19 @@
   function setPlane(a, v) {
     const n = AX[a].clone(), p = panes[S.cut.pane], d = (SIDES[p.side] || SIDES.front).d;
     let s = Math.abs(d.dot(n)) > 0.5 ? Math.sign(d.dot(n)) : -1;
-    if (S.cut.flip) s = -s;
+    if (S.cut.flip && (a === "z" || Math.abs(d.dot(n)) <= 0.5)) s = -s;
     n.multiplyScalar(s); plane.set(n, -s * v);
   }
   function cutValue() { const a = S.cut.axis; return S.box.min[a] + (S.box.max[a] - S.box.min[a]) * S.cut.t; }
-  function setCut() {
+  /* the cut pane turns to look straight at the cut (like Pro3D on the PC): X → left/right,
+     Y → front/back, Z → top; "flip" turns it round to the other half */
+  function faceCut() {
+    const a = S.cut.axis; if (!a) return;
+    const p = panes[S.cut.pane], want = { x: S.cut.flip ? "right" : "left", y: S.cut.flip ? "back" : "front", z: "top" }[a];
+    if (p.side !== want) { p.side = want; p.roll = 0; P.store.set("pane" + p.i, want); p.refit = true; }
+  }
+  function setCut(face) {
+    if (face) faceCut();
     const a = S.cut.axis;
     document.querySelectorAll("[data-axis]").forEach((b) => b.classList.toggle("on", b.dataset.axis === a));
     document.querySelectorAll("[data-cutpane]").forEach((b) => b.classList.toggle("on", !!a && +b.dataset.cutpane === S.cut.pane));
@@ -496,6 +509,7 @@
     frame = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(c), redMat);
     for (const o2 of [fillMesh, frame]) { o2.layers.set(L_CUT); cutG.add(o2); }
     dirtyScan(); requestRender();
+    for (const p of panes) if (p.refit) { p.refit = false; fitPane(p); }
   }
   function dirtyScan() { S.scanKey = ""; requestRender(); }
   /* the thin red lines where the plane meets the model's triangles (plane ∩ every visible triangle) */
@@ -537,14 +551,14 @@
   document.querySelectorAll("[data-axis]").forEach((b) => (b.onclick = () => {
     if (!S.model) return;
     if (S.cut.axis !== b.dataset.axis) S.cut.t = 0.5;
-    S.cut.axis = b.dataset.axis; setCut();
+    S.cut.axis = b.dataset.axis; setCut(true);
   }));
   $("bCutOff").onclick = () => { S.cut.axis = null; setCut(); };
-  $("bFlip").onclick = () => { S.cut.flip = !S.cut.flip; setCut(); };
+  $("bFlip").onclick = () => { S.cut.flip = !S.cut.flip; setCut(true); };
   document.querySelectorAll("[data-cutpane]").forEach((b) => (b.onclick = () => {
     S.cut.pane = +b.dataset.cutpane; P.store.set("cutpane", S.cut.pane);
     if (!S.cut.axis && S.model) S.cut.axis = "x";
-    setCut();
+    setCut(true);
   }));
   // dragging the slider: the plane follows at once; the cut lines follow each frame (big models: on release)
   $("cutS").addEventListener("input", (e) => {
