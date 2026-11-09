@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="th" data-theme="navy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Pro3D-2027">
+<meta name="theme-color" content="#13214a">
+<title>Pro3D-2027</title>
+<link rel="manifest" href="manifest-3d.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/p23.css">
+<style>
+.body { display: flex; }
+#gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.main { flex: 1 1 50%; position: relative; min-width: 0; }
+.right { flex: 1 1 50%; display: flex; flex-direction: column; border-left: 3px solid var(--bar); min-width: 0; position: relative; }
+.pane { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.pane + .pane { border-top: 3px solid var(--bar); }
+.ph { display: flex; align-items: center; gap: 2px; padding: 4px 6px; background: var(--bar); color: var(--text); font-size: 13px; white-space: nowrap; overflow-x: auto; scrollbar-width: none; flex: none; position: relative; z-index: 3; }
+.ph::-webkit-scrollbar { display: none; }
+.ph b { margin: 0 6px 0 2px; }
+.ph button { padding: 7px 9px; border-radius: 8px; }
+.ph button.on { background: var(--btn); box-shadow: inset 0 -2px 0 var(--accent); }
+.ph button.cut { color: #ff7a7a; }
+.ph .r { margin-left: auto; }
+.pv, .mv { flex: 1; position: relative; touch-action: none; }
+.mv { position: absolute; inset: 0; }
+.gest { white-space: pre-line; position: absolute; left: 10px; bottom: 10px; background: rgba(15,27,61,.82); color: #fff; font-size: 12px; padding: 7px 11px; border-radius: 10px; line-height: 1.55; pointer-events: none; transition: opacity .5s; z-index: 4; }
+.gest.hide { opacity: 0; }
+.lbl { position: absolute; transform: translate(-50%, -130%); background: #fff; color: #13214a; font-weight: 700; font-size: 13px; padding: 4px 9px; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,.35); pointer-events: none; white-space: nowrap; z-index: 3; }
+.slider { -webkit-appearance: none; appearance: none; width: 180px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.2); flex: none; touch-action: pan-x; }
+.slider::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4); }
+.slider::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 0; }
+.slider[disabled] { opacity: .35; }
+#cutAt { min-width: 92px; display: inline-block; }
+.done { position: absolute; right: 12px; bottom: 12px; z-index: 6; display: none; }
+.done.show { display: block; }
+.done button { padding: 11px 18px; border-radius: 12px; background: var(--accent); color: var(--chip); font-weight: 700; font-size: 15px; }
+.empty { z-index: 2; white-space: pre-line; }
+</style>
+<script type="importmap">{"imports":{"earcut":"./vendor/earcut/earcut.js","fflate":"./vendor/fflate/browser.js","flatbuffers":"./vendor/flatbuffers/flatbuffers.js"}}</script>
+</head>
+<body>
+<div class="top">
+  <div class="tile"><img src="logo.jpg" alt="PRO-CON"></div>
+  <div class="name">Pro3D<b>-2027</b></div>
+  <button class="pill" id="bOpen">📂 <span data-t="open"></span></button>
+  <button class="pill" id="bSample">⌂ <span data-t="sample"></span></button>
+  <div class="sp"></div>
+  <div class="seg"><button data-theme-btn="navy" data-t="th_navy"></button><button data-theme-btn="blueprint" data-t="th_blue"></button><button data-theme-btn="graphite" data-t="th_graph"></button></div>
+  <div class="seg"><button data-lang-btn="th">ไทย</button><button data-lang-btn="en">EN</button></div>
+</div>
+<div class="tools" id="tools">
+  <button class="t" id="bUndo" disabled><i>↶</i><span data-t="t_undo"></span></button>
+  <button class="t" id="bRedo" disabled><i>↷</i><span data-t="t_redo"></span></button>
+  <div class="sep"></div>
+  <button class="t on" data-tool="orbit"><i>⟲</i><span data-t="t_orbit"></span></button>
+  <button class="t" data-tool="pan"><i>✋</i><span data-t="t_pan"></span></button>
+  <button class="t" data-tool="zoom"><i>🔍</i><span data-t="t_zoom"></span></button>
+  <button class="t" id="bFit"><i>⛶</i><span data-t="t_fit"></span></button>
+  <div class="sep"></div>
+  <button class="t" data-tool="dist"><i>📏</i><span data-t="t_dist"></span></button>
+  <button class="t" data-tool="angle"><i>∠</i><span data-t="t_angle"></span></button>
+  <button class="t" data-tool="area"><i>▱</i><span data-t="t_area"></span></button>
+  <div class="sep"></div>
+  <button class="t" data-tool="hide"><i>🙈</i><span data-t="t_hide"></span></button>
+  <button class="t" id="bShow"><i>👁</i><span data-t="t_show"></span></button>
+  <button class="t" id="bXray"><i>◫</i><span data-t="t_xray"></span></button>
+</div>
+<div class="row2">
+  <span data-t="cut"></span>
+  <button class="chipb" data-axis="x" data-t="ax_x"></button><button class="chipb" data-axis="y" data-t="ax_y"></button><button class="chipb" data-axis="z" data-t="ax_z"></button>
+  <input type="range" class="slider" id="cutS" min="0" max="1000" value="500" disabled>
+  <span id="cutAt"></span>
+  <button class="chipb" id="bFlip" data-t="flip" disabled></button>
+  <span data-t="show_in"></span>
+  <button class="chipb" data-cutpane="0" data-t="p_top"></button><button class="chipb" data-cutpane="1" data-t="p_bottom"></button><button class="chipb" id="bCutOff" data-t="cut_off"></button>
+  <span class="sp"></span>
+  <span data-t="unit"></span>
+  <button class="chipb" data-unit="m" data-t="u_m"></button><button class="chipb" data-unit="in" data-t="u_in"></button>
+</div>
+<div class="body" id="body">
+  <canvas id="gl"></canvas>
+  <div class="main" id="main">
+    <div class="mv" id="mv"></div>
+    <div class="readout" id="readout"></div>
+    <div class="gest" id="gest" data-t="gest"></div>
+    <div class="done" id="done"><button id="doneBtn" data-t="clear_meas"></button></div>
+  </div>
+  <div class="right">
+    <div class="pane" data-pane="0"><div class="ph"></div><div class="pv"></div></div>
+    <div class="pane" data-pane="1"><div class="ph"></div><div class="pv"></div></div>
+  </div>
+  <div class="empty" id="empty"><b data-t="empty_t"></b><span data-t="empty_s"></span></div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="busy" id="busy"><div><i class="spin"></i><span></span></div></div>
+<script src="vendor/three.min.js"></script>
+<script src="vendor/OrbitControls.js"></script>
+<script src="vendor/GLTFLoader.js"></script>
+<script src="vendor/OBJLoader.js"></script>
+<script src="js/common.js"></script>
+<script src="js/dxfview.js"></script>
+<script src="js/igz.js"></script>
+<script src="js/pro3d.js"></script>
+</body>
+</html>

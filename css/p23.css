@@ -1,0 +1,53 @@
+/* Pro2D-2027 / Pro3D-2027 for iPad — shared look (the approved iPad mock-up). */
+:root, [data-theme="navy"] { --page:#0f1b3d; --top:#ffffff; --toptext:#13214a; --bar:#13214a; --bar2:#0f1b3d; --text:#eef2fb; --muted:#9fb0d6; --line:rgba(255,255,255,.10); --accent:#c9a46a; --chip:#0f1b3d; --pane:#0b1430; --btn:#1b2b5c; --canvas2d:#0e1838; --view3d:#d9dce2; }
+[data-theme="blueprint"] { --page:#10284d; --top:#ffffff; --toptext:#13214a; --bar:#173562; --bar2:#10284d; --text:#f2f6ff; --muted:#a9c1e8; --line:rgba(255,255,255,.12); --accent:#5fa8ff; --chip:#0b1d3a; --pane:#0d2141; --btn:#1d3f72; --canvas2d:#10233f; --view3d:#dfe6f2; }
+[data-theme="graphite"] { --page:#111419; --top:#14171d; --toptext:#eceff4; --bar:#20252f; --bar2:#1a1e26; --text:#eceff4; --muted:#8a93a3; --line:rgba(255,255,255,.08); --accent:#f2a33a; --chip:#111419; --pane:#111419; --btn:#2a303c; --canvas2d:#15181d; --view3d:#c9ccd2; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+body { font-family: "Sukhumvit Set", "Thonburi", "Leelawadee UI", "IBM Plex Sans Thai", -apple-system, "Segoe UI", sans-serif; background: var(--page); color: var(--text);
+       display: flex; flex-direction: column; -webkit-user-select: none; user-select: none; touch-action: none;
+       padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left); }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; touch-action: manipulation; }
+.top { background: var(--top); color: var(--toptext); display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-bottom: 1px solid rgba(0,0,0,.06); flex: none; }
+.tile { background: #fff; border-radius: 8px; padding: 2px 5px; display: flex; flex: none; }
+.tile img { height: 34px; display: block; }
+.name { font-weight: 800; font-size: 20px; white-space: nowrap; letter-spacing: .2px; }
+.name b { color: var(--accent); }
+.pill { display: flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 12px; border: 1px solid rgba(19,33,74,.18); font-weight: 600; font-size: 14px; white-space: nowrap; }
+[data-theme="graphite"] .pill { border-color: rgba(255,255,255,.15); }
+.pill:active { background: rgba(0,0,0,.06); }
+.sp { flex: 1; }
+.seg { display: flex; border: 1px solid rgba(19,33,74,.15); border-radius: 999px; padding: 2px; flex: none; }
+[data-theme="graphite"] .seg { border-color: rgba(255,255,255,.15); }
+.seg button { padding: 6px 11px; border-radius: 999px; font-size: 13px; white-space: nowrap; }
+.seg button.on { background: var(--accent); color: var(--chip); font-weight: 700; }
+.tools { display: flex; align-items: stretch; gap: 2px; padding: 5px 8px; background: var(--bar); border-bottom: 1px solid var(--line); overflow-x: auto; flex: none; scrollbar-width: none; }
+.tools::-webkit-scrollbar { display: none; }
+.t { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 62px; padding: 5px 4px; border-radius: 12px; font-size: 12px; white-space: nowrap; }
+.t i { font-style: normal; font-size: 22px; line-height: 1; }
+.t.on { background: var(--btn); box-shadow: inset 0 -3px 0 var(--accent); }
+.t:active { background: var(--btn); }
+.t[disabled] { opacity: .35; }
+.sep { width: 1px; background: var(--line); margin: 4px 6px; flex: none; }
+.row2 { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--bar2); font-size: 13px; border-bottom: 1px solid var(--line); white-space: nowrap; overflow-x: auto; flex: none; scrollbar-width: none; }
+.row2::-webkit-scrollbar { display: none; }
+.chipb { padding: 7px 12px; border-radius: 10px; background: var(--btn); font-size: 13px; }
+.chipb.on { background: var(--accent); color: var(--chip); font-weight: 700; }
+.chipb[disabled] { opacity: .4; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 200px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.2); outline: none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.5); }
+input[type=range]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 0; }
+.body { flex: 1; position: relative; min-height: 0; background: var(--pane); overflow: hidden; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: rgba(15,27,61,.92); color: #fff; padding: 10px 16px; border-radius: 12px; font-size: 14px; z-index: 50; max-width: 86vw; text-align: center; pointer-events: none; opacity: 0; transition: opacity .25s; }
+.toast.show { opacity: 1; }
+.busy { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 60; }
+.busy.show { display: flex; }
+.busy div { background: var(--bar); color: var(--text); padding: 18px 24px; border-radius: 16px; font-size: 15px; display: flex; gap: 12px; align-items: center; }
+.spin { width: 22px; height: 22px; border: 3px solid rgba(255,255,255,.25); border-top-color: var(--accent); border-radius: 50%; animation: sp 0.9s linear infinite; }
+@keyframes sp { to { transform: rotate(360deg); } }
+.readout { position: absolute; left: 12px; top: 12px; background: rgba(15,27,61,.88); color: #fff; padding: 8px 12px; border-radius: 10px; font-size: 14px; font-weight: 700; pointer-events: none; z-index: 5; display: none; }
+.readout.show { display: block; }
+.empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: var(--muted); font-size: 15px; text-align: center; padding: 20px; pointer-events: none; }
+.empty b { color: var(--text); font-size: 18px; }
+@media (max-width: 820px) { .name { font-size: 17px; } .tile img { height: 28px; } .pill { padding: 8px 10px; font-size: 13px; } .t { min-width: 54px; } }
+@media (orientation: portrait) and (max-width: 900px) { .seg button { padding: 5px 8px; font-size: 12px; } }

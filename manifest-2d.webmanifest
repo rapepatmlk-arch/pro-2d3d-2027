@@ -1,0 +1,18 @@
+{
+  "id": "./pro2d.html",
+  "name": "Pro2D-2027",
+  "short_name": "Pro2D-2027",
+  "description": "Pro2D-2027 — อ่านแบบ DWG / DXF / PDF บน iPad",
+  "start_url": "./pro2d.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f1b3d",
+  "theme_color": "#13214a",
+  "lang": "th",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
