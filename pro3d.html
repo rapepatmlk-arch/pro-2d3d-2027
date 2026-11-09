@@ -41,6 +41,24 @@
 .done.show { display: block; }
 .done button { padding: 11px 18px; border-radius: 12px; background: var(--accent); color: var(--chip); font-weight: 700; font-size: 15px; }
 .empty { z-index: 2; white-space: pre-line; }
+/* compact toolbars (half height): icon and label on one line */
+.tools { padding: 2px 6px; gap: 1px; }
+.tools .t { flex-direction: row; gap: 4px; min-width: 0; padding: 3px 8px; border-radius: 8px; font-size: 11px; }
+.tools .t i { font-size: 14px; }
+.tools .sep { margin: 2px 4px; }
+.row2 { padding: 2px 8px; gap: 5px; font-size: 11px; }
+.row2 .chipb { padding: 3px 8px; border-radius: 7px; font-size: 11px; }
+.slider { width: 150px; height: 4px; }
+.slider::-webkit-slider-thumb { width: 18px; height: 18px; }
+.slider::-moz-range-thumb { width: 18px; height: 18px; }
+/* elevation headers: a slim strip on the pane's right side, text at 2/3 size */
+.pane { flex-direction: row-reverse; }
+.pane + .pane { border-top: 3px solid var(--bar); }
+.ph { flex-direction: column; align-items: stretch; gap: 1px; padding: 3px 2px; width: 46px; font-size: 9px; overflow-x: hidden; overflow-y: auto; }
+.ph b { margin: 1px 0 3px; text-align: center; font-size: 8px; opacity: .8; }
+.ph button { padding: 4px 2px; border-radius: 6px; text-align: center; }
+.ph button.on { box-shadow: inset -2px 0 0 var(--accent); }
+.ph .r { margin: auto 0 0; }
 </style>
 <script type="importmap">{"imports":{"earcut":"./vendor/earcut/earcut.js","fflate":"./vendor/fflate/browser.js","flatbuffers":"./vendor/flatbuffers/flatbuffers.js"}}</script>
 </head>

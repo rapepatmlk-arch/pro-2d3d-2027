@@ -71,7 +71,13 @@
   P.pickFile = function (accept) {
     return new Promise((resolve) => {
       const inp = document.createElement("input");
-      inp.type = "file"; inp.accept = accept || "";
+      // iPad / iPhone / Android: an accept list with types the system does not know (.skp, .igz, .dwg)
+      // greys those files out in the Files picker, so on touch devices every file is offered and the
+      // program checks the extension itself
+      const touch = /iPad|iPhone|iPod|Android/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
+      inp.type = "file"; inp.accept = touch ? "" : accept || "";
+      inp.style.display = "none"; document.body.appendChild(inp);
+      setTimeout(() => inp.remove(), 60000);
       inp.onchange = () => resolve(inp.files && inp.files[0] ? inp.files[0] : null);
       inp.click();
     });
