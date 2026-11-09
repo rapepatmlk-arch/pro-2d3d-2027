@@ -1,8 +1,8 @@
 /* Pro2D-2027 / Pro3D-2027 for iPad — offline cache. Bump VERSION on every release. */
-const VERSION = "p23-ipad-2027.0.6";
+const VERSION = "p23-ipad-2027.0.7";
 const CORE = [
   "./", "pro2d.html", "pro3d.html", "css/p23.css", "js/common.js", "js/dxfview.js", "js/pro2d.js", "js/pro3d.js", "js/igz.js",
-  "logo.jpg", "sample.igz", "manifest-2d.webmanifest", "manifest-3d.webmanifest",
+  "logo.jpg", "sample.igz", "manifest-2d.webmanifest", "manifest-3d.webmanifest", "manifest-home.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png",
   "vendor/three.min.js", "vendor/OrbitControls.js", "vendor/GLTFLoader.js", "vendor/OBJLoader.js",
   "vendor/earcut/earcut.js", "vendor/fflate/browser.js", "vendor/flatbuffers/flatbuffers.js", "vendor/openskp/openskp.mjs",
