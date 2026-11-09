@@ -111,7 +111,11 @@
   };
 
   /* ---------- start ---------- */
+  P.VERSION = "2027.0.5";
   P.boot = function () {
+    // the version on screen (top bar, right) so it is easy to see which version is running
+    const top = document.querySelector(".top");
+    if (top) { const v = document.createElement("span"); v.className = "ver"; v.textContent = "v" + P.VERSION; top.appendChild(v); }
     document.querySelectorAll("[data-theme-btn]").forEach((b) => (b.onclick = () => P.setTheme(b.dataset.themeBtn)));
     document.querySelectorAll("[data-lang-btn]").forEach((b) => (b.onclick = () => P.setLang(b.dataset.langBtn)));
     P.setTheme(P.theme); P.setLang(P.lang);
@@ -120,7 +124,11 @@
     document.addEventListener("touchmove", (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
     const dev = /^(localhost|127.0.0.1)$/.test(location.hostname) && !/[?&]sw=1/.test(location.search);
     if ("serviceWorker" in navigator && location.protocol !== "file:" && !dev) {
-      navigator.serviceWorker.register("sw.js").then((reg) => {
+      // a new version took over: reload once so the page itself is the new one
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => { if (!reloaded && navigator.serviceWorker.controller) { reloaded = true; location.reload(); } });
+      navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then((reg) => {
+        reg.update().catch(() => {});
         if (!navigator.serviceWorker.controller) reg.addEventListener("updatefound", () => {
           const w = reg.installing;
           if (w) w.addEventListener("statechange", () => { if (w.state === "activated") P.toast(P.t("offline_ready")); });
