@@ -56,7 +56,7 @@
   const scene = new THREE.Scene();
   const hemi = new THREE.HemisphereLight(0xffffff, 0x9a9890, 0.8); hemi.position.set(0, 0, 1); scene.add(hemi);
   const sun = new THREE.DirectionalLight(0xffffff, 0.7); scene.add(sun, sun.target);
-  const L_CUT = 1, L_MEAS = 2, L_EDGE = 3;                 // layer 0 = model faces
+  const L_CUT = 1, L_MEAS = 2, L_EDGE = 3, L_MARK = 4;   // L_MARK: the cut line seen in the other pane                 // layer 0 = model faces
 
   // the 3D view
   const mv = $("mv");
@@ -119,6 +119,9 @@
       p.cam.left = -p.half * a; p.cam.right = p.half * a; p.cam.top = p.half; p.cam.bottom = -p.half; p.cam.updateProjectionMatrix();
       viewport(r); R.clear();
       R.clippingPlanes = S.cut.axis && S.cut.pane === p.i ? [plane] : [];
+      // the pane that is not cut shows where the cut is: a red line that follows the slider
+      const mark = S.cut.axis && S.cut.pane !== p.i && Math.abs((SIDES[p.side] || SIDES.front).d.dot(AX[S.cut.axis])) < 0.5;
+      if (mark) p.cam.layers.enable(L_MARK); else p.cam.layers.disable(L_MARK);
       lightFrom(p.cam, p.ctr);
       R.render(scene, p.cam);
     }
@@ -466,6 +469,7 @@
   const cutG = new THREE.Group(); scene.add(cutG);
   const fillMat = new THREE.MeshBasicMaterial({ color: 0xff2020, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide });
   const redMat = new THREE.LineBasicMaterial({ color: 0xe01010 });
+  const markMat = new THREE.LineBasicMaterial({ color: 0xff1a1a, depthTest: false, transparent: true });
   let fillMesh = null, frame = null, scanLines = null;
   const AX = { x: V3(1, 0, 0), y: V3(0, 1, 0), z: V3(0, 0, 1) };
   /* the kept side: the half beyond the cut as the cut pane looks at it (so the pane shows the cut
@@ -508,6 +512,7 @@
     fillMesh = new THREE.Mesh(fg, fillMat); fillMesh.renderOrder = 5;
     frame = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(c), redMat);
     for (const o2 of [fillMesh, frame]) { o2.layers.set(L_CUT); cutG.add(o2); }
+    const mark = new THREE.LineLoop(frame.geometry, markMat); mark.layers.set(L_MARK); mark.renderOrder = 20; cutG.add(mark);
     dirtyScan(); requestRender();
     for (const p of panes) if (p.refit) { p.refit = false; fitPane(p); }
   }
