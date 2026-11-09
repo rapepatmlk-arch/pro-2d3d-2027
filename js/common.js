@@ -111,7 +111,7 @@
   };
 
   /* ---------- start ---------- */
-  P.VERSION = "2027.0.5";
+  P.VERSION = "2027.0.6";
   P.boot = function () {
     // the version on screen (top bar, right) so it is easy to see which version is running
     const top = document.querySelector(".top");

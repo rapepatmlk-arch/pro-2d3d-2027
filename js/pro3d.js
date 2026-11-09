@@ -77,7 +77,7 @@
     const c = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 1000);
     c.layers.enable(L_MEAS); c.layers.enable(L_EDGE);
     return { i, el, view: el.querySelector(".pv"), head: el.querySelector(".ph"), cam: c,
-             side: P.store.get("pane" + i, i === 0 ? "front" : "right"), roll: 0, half: 10, ctr: V3(0, 0, 0) };
+             side: P.store.get("pane" + i, i === 0 ? "front" : "right"), roll: 0, half: 10, ctr: V3(0, 0, 0), plane: new THREE.Plane() };
   });
 
   /* ---------- drawing (on demand) ---------- */
@@ -118,10 +118,9 @@
       const a = r.w / r.h;
       p.cam.left = -p.half * a; p.cam.right = p.half * a; p.cam.top = p.half; p.cam.bottom = -p.half; p.cam.updateProjectionMatrix();
       viewport(r); R.clear();
-      R.clippingPlanes = S.cut.axis && S.cut.pane === p.i ? [plane] : [];
+      R.clippingPlanes = S.cut.axis ? [planeFor(p)] : [];
       // the pane that is not cut shows where the cut is: a red line that follows the slider
-      const mark = S.cut.axis && S.cut.pane !== p.i && Math.abs((SIDES[p.side] || SIDES.front).d.dot(AX[S.cut.axis])) < 0.5;
-      if (mark) p.cam.layers.enable(L_MARK); else p.cam.layers.disable(L_MARK);
+      p.cam.layers.disable(L_MARK);
       lightFrom(p.cam, p.ctr);
       R.render(scene, p.cam);
     }
@@ -252,7 +251,7 @@
     const rl = document.createElement("button"); rl.textContent = "↺"; rl.onclick = () => { p.roll = (p.roll + 3) % 4; fitPane(p); };
     const rr = document.createElement("button"); rr.textContent = "↻"; rr.onclick = () => { p.roll = (p.roll + 1) % 4; fitPane(p); };
     h.append(rl, rr);
-    if (S.cut.axis && S.cut.pane === p.i) { const c = document.createElement("button"); c.className = "cut"; c.textContent = P.t("cutmark"); c.disabled = true; h.appendChild(c); }
+    if (S.cut.axis) { const c = document.createElement("button"); c.className = "cut"; c.textContent = P.t("cutmark"); c.disabled = true; h.appendChild(c); }
     const f = document.createElement("button"); f.className = "r"; f.textContent = P.t("fitp"); f.onclick = () => fitPane(p);
     h.appendChild(f);
   }
@@ -279,8 +278,8 @@
     const b = el.getBoundingClientRect();
     const ndc = new THREE.Vector2(((sx - b.left) / b.width) * 2 - 1, 1 - ((sy - b.top) / b.height) * 2);
     ray.setFromCamera(ndc, c);
-    const cutHere = view !== "main" && S.cut.axis && S.cut.pane === view;
-    const hits = ray.intersectObject(S.model, true).filter((h) => h.object.isMesh && visibleChain(h.object) && h.face && (!cutHere || plane.distanceToPoint(h.point) >= -1e-6));
+    const cp = view !== "main" && S.cut.axis ? planeFor(panes[view]) : null;
+    const hits = ray.intersectObject(S.model, true).filter((h) => h.object.isMesh && visibleChain(h.object) && h.face && (!cp || cp.distanceToPoint(h.point) >= -1e-6));
     if (!hits.length) return null;
     const h = hits[0];
     // snap to a corner of the touched triangle when it is within 18 px
@@ -479,6 +478,17 @@
     let s = Math.abs(d.dot(n)) > 0.5 ? Math.sign(d.dot(n)) : -1;
     if (S.cut.flip && (a === "z" || Math.abs(d.dot(n)) <= 0.5)) s = -s;
     n.multiplyScalar(s); plane.set(n, -s * v);
+  }
+  /* both elevations are cut at the same place. The pane chosen in "show in" turns to face the cut;
+     the other keeps its own side: looking along the cut axis it keeps the half beyond the cut (so it
+     shows the cut face too), looking across it keeps the same half as the 3D plane */
+  function planeFor(p) {
+    if (p.i === S.cut.pane) return plane;
+    const a = S.cut.axis, n = AX[a], d = (SIDES[p.side] || SIDES.front).d, dot = d.dot(n);
+    if (Math.abs(dot) <= 0.5) return plane;
+    let s = Math.sign(dot);
+    if (S.cut.flip && a === "z") s = -s;
+    return p.plane.set(n.clone().multiplyScalar(s), -s * cutValue());
   }
   function cutValue() { const a = S.cut.axis; return S.box.min[a] + (S.box.max[a] - S.box.min[a]) * S.cut.t; }
   /* the cut pane turns to look straight at the cut (like Pro3D on the PC): X → left/right,

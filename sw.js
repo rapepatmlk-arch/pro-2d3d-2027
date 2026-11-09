@@ -1,5 +1,5 @@
 /* Pro2D-2027 / Pro3D-2027 for iPad — offline cache. Bump VERSION on every release. */
-const VERSION = "p23-ipad-2027.0.5";
+const VERSION = "p23-ipad-2027.0.6";
 const CORE = [
   "./", "pro2d.html", "pro3d.html", "css/p23.css", "js/common.js", "js/dxfview.js", "js/pro2d.js", "js/pro3d.js", "js/igz.js",
   "logo.jpg", "sample.igz", "manifest-2d.webmanifest", "manifest-3d.webmanifest",
